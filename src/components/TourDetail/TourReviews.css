@@ -1,0 +1,17 @@
+#partials_reviews {
+    margin-top: 20px;
+  }
+  .review-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  .review-item p {
+    margin: 0;
+    font-style: italic;
+  }
+  .review-item strong {
+    color: #333;
+  }
+  .review-item small {
+    color: #777;
+  }
