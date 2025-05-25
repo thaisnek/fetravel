@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUser, FaArrowRight } from 'react-icons/fa';
@@ -16,6 +15,11 @@ const Navbar = () => {
     setIsSearchOpen(!isSearchOpen);
   };
 
+  // Toggle dropdown menu
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   // Xử lý submit form
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -25,7 +29,7 @@ const Navbar = () => {
       return;
     }
     try {
-      const response = await axios.get('http://localhost:8080/ltweb/api/search-tours', {
+      const response = await axios.get('http://localhost:8080/ltweb/api/tours/search-tours', {
         params: { keyword: searchKeyword },
       });
       navigate('/search', { state: { tours: response.data || [] } });
@@ -122,33 +126,58 @@ const Navbar = () => {
             </div>
 
             <div className="menu-btns py-10">
-              <Link to="/tours" className="theme-btn style-two bgc-secondary">
+              <Link to="/all-tours" className="theme-btn style-two bgc-secondary">
                 <span data-hover="Đặt Ngay">Book Now</span>
                 <FaArrowRight />
               </Link>
               <div className="menu-sidebar">
-                <li className="drop-down">
+                <li className="drop-down" style={{ position: 'relative', display: 'inline-block' }}>
                   <button
                     className="dropdown-toggle bg-transparent"
                     id="userDropdown"
-                    style={{ color: 'white' }}
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    style={{ color: 'white', border: 'none', background: 'none', cursor: 'pointer' }}
+                    onClick={toggleDropdown}
+                    aria-expanded={isDropdownOpen}
                   >
                     <FaUser style={{ fontSize: '36px', color: 'white' }} />
                   </button>
                   {isDropdownOpen && (
-                    <ul className="dropdown-menu" id="dropdownMenu">
-                      <li>
-                        <Link to="/user-profile">Thông tin cá nhân</Link>
+                    <ul
+                      className="dropdown-menu"
+                      id="dropdownMenu"
+                      style={{
+                        display: 'block',
+                        position: 'absolute',
+                        top: '100%',
+                        right: '0',
+                        backgroundColor: 'white',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                        minWidth: '150px',
+                        zIndex: '1000',
+                        margin: '0',
+                        padding: '10px 0',
+                        listStyle: 'none',
+                      }}
+                    >
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/my-profile" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Thông tin cá nhân
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/my-tours">Tour đã đặt</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/my-tours" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Tour đã đặt
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/signup">Đăng ký</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/signup" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Đăng ký
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/login">Đăng nhập</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/login" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Đăng nhập
+                        </Link>
                       </li>
                     </ul>
                   )}

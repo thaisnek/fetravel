@@ -16,8 +16,8 @@ export default function Sidebar() {
       </div>
       <Nav className="flex-column">
         <Nav.Link href="#" className="text-white"><BsSpeedometer2 className="me-2" />Dashboard</Nav.Link>
-        <Nav.Link href="#" className="text-white"><BsPerson className="me-2" />Quản lý Admin</Nav.Link>
-        <Nav.Link href="#" className="text-white"><BsPeople className="me-2" />Quản lý người dùng</Nav.Link>
+        <Nav.Link href="/admin/admin-profile" className="text-white"><BsPerson className="me-2" />Quản lý Admin</Nav.Link>
+        <Nav.Link href="/admin/user" className="text-white"><BsPeople className="me-2" />Quản lý người dùng</Nav.Link>
         <Nav.Link href="/admin/tour" className="text-white"><BsCardChecklist className="me-2" />Quản lý Tours</Nav.Link>
         <Nav.Link href="/admin/booking" className="text-white"><BsBook className="me-2" />Quản lý Booking</Nav.Link>
         <Nav.Link href="/admin/review" className="text-white"><BsStar className="me-2" />Quản lý Review</Nav.Link>

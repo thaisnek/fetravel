@@ -7,6 +7,20 @@ const TourRecommendations = ({ tourId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const BACKEND_URL = "http://localhost:8080";
+  const IMAGE_PATH = "/ltweb/images/tour/";
+
+  // Hàm build URL ảnh từ backend
+  const getImageUrl = (image) => {
+    if (image && image.imageURL) {
+      if (image.imageURL.startsWith('http')) {
+        return image.imageURL;
+      }
+      return BACKEND_URL + IMAGE_PATH + image.imageURL;
+    }
+    return '/assets/images/default-tour.jpg'; // Ảnh mặc định nếu không có imageURL
+  };
+
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
@@ -16,8 +30,8 @@ const TourRecommendations = ({ tourId }) => {
         const tours = (response.data || []).map(tour => {
           console.log('Tour images:', tour.images); // Debug: kiểm tra images
           // Lấy ảnh thứ hai (index 1)
-          const secondImage = tour.images && tour.images.length >= 2 ? tour.images[1] : null;
-          const imageUrl = secondImage ? secondImage.imageURL : '/assets/images/default-tour.jpg'; // Ảnh mặc định
+          const secondImage = tour.images && tour.images.length >= 2 ? tour.images[1] : (tour.images && tour.images.length > 0 ? tour.images[0] : null);
+          const imageUrl = secondImage ? getImageUrl(secondImage) : '/assets/images/default-tour.jpg'; // Ảnh mặc định
           const tourData = {
             tourId: tour.tourID,
             title: tour.title,
@@ -56,19 +70,19 @@ const TourRecommendations = ({ tourId }) => {
                   src={tour.imageUrl}
                   alt={tour.title}
                   style={{ maxHeight: '137px', width: '100%', objectFit: 'cover' }}
-                  onError={() => console.log(`Failed to load image: ${tour.imageUrl}`)} // Debug: lỗi tải ảnh
+                  onError={() => console.log(`Failed to load image: ${tour.imageUrl}`)} 
                 />
               </div>
             )}
             <div className="content">
               <div className="destination-header">
                 <span className="location">
-                    <FaMapMarkerAlt className="icon" /> {tour.destination}
+                  <FaMapMarkerAlt className="icon" /> {tour.destination}
                 </span>
                 <span>{tour.duration}</span>
               </div>
               <h6>
-                <a href={`/tour-detail/${tour.tourId}`}>{tour.title}</a>
+                <a href={`/tour-details/${tour.tourId}`}>{tour.title}</a>
               </h6>
             </div>
           </div>

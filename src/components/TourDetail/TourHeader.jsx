@@ -10,14 +10,16 @@ const TourHeader = ({ tour }) => {
             <div class="tour-header-content mb-15">
                 <span class="location d-inline-block mb-10"><FaMapMarkerAlt /> {tour.destination}</span>
                 <div class="section-title pb-5">
-                    <h2>Tour Hà Nội - Sapa</h2>
+                    <h2>{tour.title}</h2>
                 </div>
-                <div className="ratting filled">
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
+                <div className="ratting filled" style={{ marginTop: 5 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <FaStar
+                      key={i}
+                      className={i < tour.averageRating ? "star filled" : "star empty"}
+                      style={{ color: i < tour.averageRating ? "#ffb300" : "#ddd" }}
+                    />
+                  ))}
                 </div>
             </div>
           </div>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Spinner } from "react-bootstrap";
+import { Button, Table, Spinner, Modal } from "react-bootstrap";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { getAllTours, createTour, updateTour, deleteTour } from "../../../services/api";
-import TourFormModal from "./TourFormModal"; // import component modal vừa tạo
+import TourFormModal from "./TourFormModal";
+import TourImageUploader from "./TourImageUploader";
 
 export default function TourTable() {
   const [tours, setTours] = useState([]);
@@ -10,9 +11,12 @@ export default function TourTable() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [editTour, setEditTour] = useState(null);
+
+  // State cho upload ảnh
+  const [createdTourId, setCreatedTourId] = useState(null);
+  const [showImageUpload, setShowImageUpload] = useState(false);
 
   useEffect(() => {
     fetchTours();
@@ -60,16 +64,33 @@ export default function TourTable() {
 
   const handleModalSubmit = async (formData) => {
     try {
+      let response;
       if (editTour) {
-        await updateTour(editTour.tourID, formData);
+        response = await updateTour(editTour.tourID, formData);
       } else {
-        await createTour(formData);
+        response = await createTour(formData);
       }
-      handleModalClose();
-      fetchTours();
+
+      if (response && (response.tourID || response.id)) {
+        handleModalClose();
+        fetchTours();
+        setCreatedTourId(response.tourID || response.id);
+        setShowImageUpload(true);
+        return;
+      }
+
+      // Nếu không đúng cả 2 trường hợp trên, báo lỗi
+      const errorCode = response.code || "Unknown";
+      const errorMsg = response.message || "Không có thông báo lỗi";
+      alert(`Lỗi ${errorCode}: ${errorMsg}`);
     } catch (err) {
-      alert("Lưu tour thất bại!");
+      alert("Lỗi không xác định: " + (err.message || "Vui lòng thử lại"));
     }
+  };
+
+  const handleImageUploadClose = () => {
+    setShowImageUpload(false);
+    setCreatedTourId(null);
   };
 
   return (
@@ -149,6 +170,24 @@ export default function TourTable() {
         initialData={editTour}
         isEdit={!!editTour}
       />
+
+      {/* Modal upload ảnh */}
+      <Modal show={showImageUpload} onHide={handleImageUploadClose} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Upload Ảnh cho Tour</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {createdTourId && (
+            <TourImageUploader
+              tourId={createdTourId}
+              onUploaded={() => {
+                handleImageUploadClose();
+                fetchTours();
+              }}
+            />
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }

@@ -9,8 +9,8 @@ const TourList = () => {
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const tourData = await getTours(); // Gọi API
-        setTours(tourData); // Cập nhật state với dữ liệu từ API
+        const tourData = await getTours(); 
+        setTours(tourData); 
         setLoading(false);
       } catch (error) {
         console.error('Error fetching tours:', error);
@@ -19,7 +19,7 @@ const TourList = () => {
     };
 
     fetchTours();
-  }, []); // Chạy một lần khi component mount
+  }, []); 
 
   if (loading) {
     return (

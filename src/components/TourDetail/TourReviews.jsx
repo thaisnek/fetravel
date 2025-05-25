@@ -39,7 +39,7 @@ const TourReviews = ({ tourId }) => {
         reviews.map(review => (
           <div key={review.id} className="review-item">
             <p>
-              <strong>{review.username}</strong> ({review.rating}/5): {review.comment}
+              <strong>{review.fullName}</strong> ({review.rating}/5): {review.comment}
               <br />
               <small>{new Date(review.timestamp).toLocaleDateString('vi-VN')}</small>
             </p>

@@ -1,6 +1,21 @@
-
 import React from 'react';
 import { FaHeart, FaStar, FaRegStar, FaClock, FaUser, FaArrowRight, FaMapMarkerAlt } from 'react-icons/fa';
+
+const BACKEND_URL = "http://localhost:8080";
+const IMAGE_PATH = "/ltweb/images/tour/";
+
+const getImageUrl = (tour) => {
+  if (tour.images && tour.images.length > 0 && tour.images[0].imageURL) {
+    // Nếu imageURL là URL đầy đủ
+    if (tour.images[0].imageURL.startsWith('http')) {
+      return tour.images[0].imageURL;
+    }
+    // Nếu chỉ là tên file, build lại URL
+    return BACKEND_URL + IMAGE_PATH + tour.images[0].imageURL;
+  }
+  // Ảnh mặc định nếu không có ảnh
+  return '/assets/images/gallery-tours/tfd_240115101543_813851_CON_DAO_1732899101.jpg';
+};
 
 const SearchList = ({ tours }) => {
   return (
@@ -9,7 +24,7 @@ const SearchList = ({ tours }) => {
         <div className="row">
           {tours.length === 0 ? (
             <h4 className="alert alert-danger">
-              Không có tour nào liên quan đến tìm kiếm của bạn. Thử tìm kiếm với từ khóa khác như "Hà Nội", "Đà Nẵng" nhé!
+              Không có tour nào liên quan đến tìm kiếm của bạn. Thử tìm kiếm với từ khóa khác nhé!
             </h4>
           ) : (
             tours.map((tour) => (
@@ -25,8 +40,8 @@ const SearchList = ({ tours }) => {
                       <FaHeart />
                     </a>
                     <img
-                      src={tour.images && tour.images.length > 0 ? tour.images[0].imageURL : '/assets/images/gallery-tours/tfd_240115101543_813851_CON_DAO_1732899101.jpg'}
-                      alt={tour.images && tour.images.length > 0 ? tour.images[0].description : 'Tour'}
+                      src={getImageUrl(tour)}
+                      alt={tour.images && tour.images.length > 0 ? tour.images[0].description || 'Tour' : 'Tour'}
                     />
                   </div>
                   <div className="content equal-content-fix">

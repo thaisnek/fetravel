@@ -12,6 +12,10 @@ import AdminTour from '../pages/AdminTour';
 import AdminBooking from '../pages/AdminBooking';
 import AdminReview from '../pages/AdminReview';
 import AdminPromotion from '../pages/AdminPromotion';
+import MyTourPage from '../pages/MyTourPage';
+import UserProfilePage from '../pages/UserProfilePage';
+import AdminUser from '../pages/AdminUser';
+import AdminProfilePage from '../pages/AdminProfilePage';
 
 const AppRoutes = () => {
   return (
@@ -25,10 +29,14 @@ const AppRoutes = () => {
       <Route path="/payment/cancel" element={<CancelPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/my-tours" element={<MyTourPage />} />
+      <Route path="/my-profile" element={<UserProfilePage />} />
       <Route path="/admin/tour" element={<AdminTour />} />
       <Route path="/admin/booking" element={<AdminBooking />} />
       <Route path="/admin/review" element={<AdminReview />} />
       <Route path="/admin/promotion" element={<AdminPromotion />} />
+      <Route path="/admin/user" element={<AdminUser />} />
+      <Route path="/admin/admin-profile" element={<AdminProfilePage />} />
     </Routes>
   );
 };

@@ -46,7 +46,7 @@ const HeroSection = () => {
       console.log('Tham số gửi đi:', searchData);
 
       // Gửi yêu cầu với tham số
-      const response = await axios.get('http://localhost:8080/ltweb/api/search', {
+      const response = await axios.get('http://localhost:8080/ltweb/api/tours/search', {
         params: {
           destination: searchData.destination || null,
           startDate: searchData.startDate || null,
@@ -105,7 +105,7 @@ const HeroSection = () => {
                 <option value="Đà Nẵng">Đà Nẵng</option>
                 <option value="Côn Đảo">Côn Đảo</option>
                 <option value="Hà Nội">Hà Nội</option>
-                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
                 <option value="Hạ Long">Hạ Long</option>
                 <option value="Ninh Bình">Ninh Bình</option>
                 <option value="Phú Quốc">Phú Quốc</option>

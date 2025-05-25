@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { getAvailableTours, filterTours } from '../../services/api'; // Import các hàm API
-import { FaStar, FaMapMarkerAlt, FaArrowRight } from 'react-icons/fa';
+import { getAvailableTours } from '../../services/api'; // Import các hàm API
+import { FaStar, FaMapMarkerAlt, FaArrowRight, FaChevronLeft, FaChevronRight} from 'react-icons/fa';
 import Slider from 'rc-slider'; // Import Slider để lọc giá
 import 'rc-slider/assets/index.css'; // Import CSS cho Slider
 
+
+// Định nghĩa các hằng số về đường dẫn ảnh
+const BACKEND_URL = "http://localhost:8080";
+const IMAGE_PATH = "/ltweb/images/tour/";
+
 const AllTour = () => {
   const [tours, setTours] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [size] = useState(9);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     minPrice: null,
@@ -15,58 +23,54 @@ const AllTour = () => {
     time: null,
     sorting: null,
   });
+  const [priceRange, setPriceRange] = useState([0, 10000000]);
 
-  // Giá trị mặc định cho Slider giá
-  const [priceRange, setPriceRange] = useState([0, 10000000]); // Giả sử giá từ 0 đến 10 triệu
-
-  // Hàm gọi API để lấy danh sách tour
-  const fetchTours = async () => {
-    try {
+  // Gọi API khi filter hoặc page thay đổi
+  useEffect(() => {
+    const fetchTours = async () => {
       setLoading(true);
-      // Chuẩn bị tham số lọc
-      const filterParams = {};
-      if (filters.minPrice !== null) filterParams.minPrice = filters.minPrice;
-      if (filters.maxPrice !== null) filterParams.maxPrice = filters.maxPrice;
-      if (filters.domain) filterParams.domain = filters.domain;
-      if (filters.star !== null) filterParams.star = filters.star;
-      if (filters.time) filterParams.time = filters.time;
-      if (filters.sorting) filterParams.sorting = filters.sorting;
+      try {
+        // Gộp params lọc + phân trang
+        const params = {
+          page,
+          size,
+          ...(filters.minPrice !== null && { minPrice: filters.minPrice }),
+          ...(filters.maxPrice !== null && { maxPrice: filters.maxPrice }),
+          ...(filters.domain && { domain: filters.domain }),
+          ...(filters.star !== null && { star: filters.star }),
+          ...(filters.duration && { duration: filters.duration }),
+          ...(filters.sorting && { sort: filters.sorting }),
+        };
+        const response = await getAvailableTours(params);
+        const mappedTours = response.content.map((tour) => ({
+          id: tour.tourID,
+          images: tour.images,
+          location: tour.destination,
+          title: tour.title,
+          duration: tour.duration,
+          capacity: tour.quantity,
+          price: tour.priceAdult?.toLocaleString(),
+          rating: tour.averageRating,
+        }));
+        setTours(mappedTours);
+        setTotalPages(response.totalPages);
+      } catch (error) {
+        setTours([]);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTours();
+  }, [filters, page, size]);
 
-      // Gọi API lọc tour
-      const tourData = await filterTours(filterParams);
-
-      // Ánh xạ dữ liệu tour
-      const mappedTours = tourData.map(tour => ({
-        id: tour.tourID,
-        image: tour.images && tour.images.length > 0
-          ? tour.images[0].imageURL
-          : '/assets/images/gallery-tours/mien-trung-4n3d-da-nang-hoi-an-ba-na-hue-4.png',
-        location: tour.destination,
-        title: tour.title,
-        duration: tour.duration,
-        capacity: tour.quantity,
-        price: tour.priceAdult.toLocaleString(),
-        rating: 5, // Rating sẽ được cập nhật sau nếu backend trả về trung bình sao
-      }));
-      setTours(mappedTours);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching tours:', error);
-      setLoading(false);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
     }
   };
 
-  // Gọi API lần đầu khi component mount
-  useEffect(() => {
-    fetchTours();
-  }, []);
-
-  // Gọi lại API khi bộ lọc thay đổi
-  useEffect(() => {
-    fetchTours();
-  }, [filters]);
-
-  // Xử lý thay đổi giá từ Slider
+  // Xử lý filter
   const handlePriceChange = (value) => {
     setPriceRange(value);
     setFilters(prev => ({
@@ -76,7 +80,6 @@ const AllTour = () => {
     }));
   };
 
-  // Xử lý thay đổi domain
   const handleDomainChange = (e) => {
     const domain = e.target.value;
     const mappedDomain = {
@@ -90,7 +93,6 @@ const AllTour = () => {
     }));
   };
 
-  // Xử lý thay đổi đánh giá
   const handleStarChange = (e) => {
     const star = parseInt(e.target.value);
     setFilters(prev => ({
@@ -99,25 +101,23 @@ const AllTour = () => {
     }));
   };
 
-  // Xử lý thay đổi thời gian
   const handleDurationChange = (e) => {
-    const time = e.target.value;
+    const duration = e.target.value;
     setFilters(prev => ({
       ...prev,
-      time: time,
+      duration: duration,
     }));
   };
 
-  // Xử lý thay đổi sắp xếp
   const handleSortingChange = (e) => {
     const sorting = e.target.value !== 'default' ? e.target.value : null;
     setFilters(prev => ({
       ...prev,
       sorting: sorting,
     }));
+    setPage(0); // Reset về trang đầu khi đổi sort
   };
 
-  // Xử lý clear bộ lọc
   const handleClearFilters = () => {
     setFilters({
       minPrice: null,
@@ -127,7 +127,8 @@ const AllTour = () => {
       time: null,
       sorting: null,
     });
-    setPriceRange([0, 10000000]); // Reset Slider giá
+    setPriceRange([0, 10000000]);
+    setPage(0);
   };
 
   if (loading) {
@@ -261,9 +262,9 @@ const AllTour = () => {
                       type="radio"
                       name="duration"
                       id="3ngay2dem"
-                      value="3n2d"
+                      value="3N2Đ"
                       onChange={handleDurationChange}
-                      checked={filters.time === '3n2d'}
+                      checked={filters.duration === '3N2Đ'}
                     />
                     <label htmlFor="3ngay2dem">3 ngày 2 đêm</label>
                   </li>
@@ -272,9 +273,9 @@ const AllTour = () => {
                       type="radio"
                       name="duration"
                       id="4ngay3dem"
-                      value="4n3d"
+                      value="4N3Đ"
                       onChange={handleDurationChange}
-                      checked={filters.time === '4n3d'}
+                      checked={filters.duration === '4N3Đ'}
                     />
                     <label htmlFor="4ngay3dem">4 ngày 3 đêm</label>
                   </li>
@@ -283,9 +284,9 @@ const AllTour = () => {
                       type="radio"
                       name="duration"
                       id="5ngay4dem"
-                      value="5n4d"
+                      value="5N4Đ"
                       onChange={handleDurationChange}
-                      checked={filters.time === '5n4d'}
+                      checked={filters.duration === '5N4Đ'}
                     />
                     <label htmlFor="5ngay4dem">5 ngày 4 đêm</label>
                   </li>
@@ -329,10 +330,10 @@ const AllTour = () => {
                   value={filters.sorting || 'default'}
                 >
                   <option value="default">Sắp xếp theo</option>
-                  <option value="new">Mới nhất</option>
-                  <option value="old">Cũ nhất</option>
-                  <option value="hight-to-low">Cao đến thấp</option>
-                  <option value="low-to-high">Thấp đến cao</option>
+                  <option value="tourID,desc">Mới nhất</option>
+                  <option value="tourID,asc">Cũ nhất</option>
+                  <option value="priceAdult,desc">Cao đến thấp</option>
+                  <option value="priceAdult,asc">Thấp đến cao</option>
                 </select>
               </div>
             </div>
@@ -340,34 +341,49 @@ const AllTour = () => {
             {/* Tour Grid */}
             <div className="tour-grid-wrap">
               <div className="row" id="tours-container">
-                {tours.map((tour) => (
-                  <div key={tour.id} className="col-xl-4 col-md-6" style={{ marginBottom: '30px' }}>
+                {tours.map((mappedTours) => (
+                  <div key={mappedTours.id} className="col-xl-4 col-md-6" style={{ marginBottom: "30px" }}>
                     <div className="destination-item tour-grid style-three bgc-lighter block_tours equal-block-fix">
                       <div className="image">
                         <span className="badge bgc-pink">Featured</span>
-                        <img src={tour.image} alt="Tour List" />
+                        <img src={mappedTours.images?.[0]?.imageURL 
+                          ? BACKEND_URL + IMAGE_PATH + mappedTours.images[0].imageURL
+                          : '/assets/images/default-tour.jpg'} alt={mappedTours.title || "Tour List"} />
                       </div>
                       <div className="content equal-content-fix">
                         <div className="destination-header">
                           <span className="location">
-                            <FaMapMarkerAlt /> {tour.location}
-                            <div className="ratting filled">
-                              {[...Array(5)].map((_, i) => (
-                                <FaStar key={i} className={i < tour.rating ? "star filled" : "star empty"} />
-                              ))}
-                            </div>
+                            <FaMapMarkerAlt /> {mappedTours.location}
                           </span>
+                          <div className="ratting filled" style={{ marginTop: 5 }}>
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar
+                                key={i}
+                                className={i < mappedTours.rating ? "star filled" : "star empty"}
+                                style={{ color: i < mappedTours.rating ? "#ffb300" : "#ddd" }}
+                              />
+                            ))}
+                          </div>
                         </div>
-                        <h6><a href={`/tour-details/${tour.id}`}>{tour.title}</a></h6>
+                        <h6>
+                          <a href={`/tour-details/${mappedTours.id}`}>{mappedTours.title}</a>
+                        </h6>
                         <ul className="blog-meta">
-                          <li><i className="far fa-clock"></i>{tour.duration}</li>
-                          <li><i className="far fa-user"></i>{tour.capacity}</li>
+                          <li>
+                            <i className="far fa-clock"></i> {mappedTours.duration}
+                          </li>
+                          <li>
+                            <i className="far fa-user"></i> {mappedTours.capacity}
+                          </li>
                         </ul>
                         <div className="destination-footer">
                           <span className="price">
-                            <span>{tour.price}</span> VND / người
+                            <span>{mappedTours.price}</span> VND / người
                           </span>
-                          <a href={`/tour-details/${tour.id}`} className="theme-btn style-two style-three">
+                          <a
+                            href={`/tour-details/${mappedTours.id}`}
+                            className="theme-btn style-two style-three"
+                          >
                             <FaArrowRight />
                           </a>
                         </div>
@@ -377,6 +393,35 @@ const AllTour = () => {
                 ))}
               </div>
             </div>
+
+            {/* Pagination */}
+            <ul className="pagination justify-content-center pt-15 flex-wrap pagination-tours">
+              <li className={`page-item ${page === 0 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 0}
+                >
+                  <FaChevronLeft />
+                </button>
+              </li>
+              {Array.from({ length: totalPages }, (_, idx) => (
+                <li className={`page-item ${page === idx ? "active" : ""}`} key={idx}>
+                  <button className="page-link" onClick={() => handlePageChange(idx)}>
+                    {idx + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${page === totalPages - 1 ? "disabled" : ""}`}>
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages - 1}
+                >
+                  <FaChevronRight />
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

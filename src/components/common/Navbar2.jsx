@@ -12,6 +12,10 @@ const Navbar2 = () => {
     setIsSearchOpen(!isSearchOpen);
   };
 
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     const keyword = e.target.keyword.value;
@@ -54,8 +58,8 @@ const Navbar2 = () => {
                       <Link to="/about">Giới thiệu</Link>
                     </li>
                     <li className="active">
-                        <Link to="/all-tours">Tours</Link>
-                        </li>
+                      <Link to="/all-tours">Tours</Link>
+                    </li>
                     <li>
                       <Link to="/destinations">Điểm đến</Link>
                     </li>
@@ -68,7 +72,21 @@ const Navbar2 = () => {
             </div>
 
             <div className="nav-search">
-              <button onClick={toggleSearch}>
+              <button 
+                onClick={toggleSearch} 
+                style={{  
+                  color: '#333333', 
+                  border: '2px solid #333333', 
+                  padding: '8px', 
+                  borderRadius: '50%', 
+                  cursor: 'pointer',
+                  width: '40px', 
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
                 <FaSearch />
               </button>
               <form
@@ -95,31 +113,58 @@ const Navbar2 = () => {
                 <FaArrowRight />
               </Link>
               <div className="menu-sidebar">
-                <li className="drop-down">
+                <li className="drop-down" style={{ position: 'relative', display: 'inline-block' }}>
                   <button
                     className="dropdown-toggle bg-transparent"
                     id="userDropdown"
-                    style={{ color: 'black' }}
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    style={{ color: 'black', border: 'none', background: 'none', cursor: 'pointer' }}
+                    onClick={toggleDropdown}
+                    aria-expanded={isDropdownOpen}
                   >
                     <FaUser style={{ fontSize: '36px', color: 'black' }} />
                   </button>
                   {isDropdownOpen && (
-                    <ul className="dropdown-menu" id="dropdownMenu">
-                      <li>
-                        <Link to="/user-profile">Thông tin cá nhân</Link>
+                    <ul
+                      className="dropdown-menu"
+                      id="dropdownMenu"
+                      style={{
+                        display: 'block',
+                        position: 'absolute',
+                        top: '100%',
+                        right: '0',
+                        backgroundColor: 'white',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                        minWidth: '150px',
+                        zIndex: '1000',
+                        margin: '0',
+                        padding: '10px 0',
+                        listStyle: 'none',
+                      }}
+                    >
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/my-profile" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Thông tin cá nhân
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/my-tours">Tour đã đặt</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/my-tours" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Tour đã đặt
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/login">Đăng nhập</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/login" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Đăng nhập
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/signup">Đăng ký</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/signup" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Đăng ký
+                        </Link>
                       </li>
-                      <li>
-                        <Link to="/logout">Đăng xuất</Link>
+                      <li style={{ padding: '8px 20px' }}>
+                        <Link to="/logout" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                          Đăng xuất
+                        </Link>
                       </li>
                     </ul>
                   )}

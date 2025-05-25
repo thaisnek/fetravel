@@ -1,7 +1,7 @@
-// src/services/api.js
+
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/ltweb/api'; // Thêm context path /ltweb
+const API_URL = 'http://localhost:8080/ltweb/api'; 
 
 export const getTours = async () => {
   try {
@@ -13,29 +13,20 @@ export const getTours = async () => {
   }
 };
 
-export const getAvailableTours = async () => {
+export const getAvailableTours = async (params = {}) => {
   try {
-    const response = await axios.get(`${API_URL}/all-tours`, {
-      params: { availability: true } // Chỉ lấy tour có availability = true
-    });
-    return response.data;
+    const response = await axios.get(`${API_URL}/tours/all-tours`, { params });
+    return response.data; 
   } catch (error) {
     console.error('Error fetching available tours:', error);
     throw error;
   }
 };
 
-// Gọi API lọc tour
-export const filterTours = async (filters) => {
-  const response = await axios.get(`${API_URL}/filter`, {
-    params: filters,
-  });
-  return response.data;
-};
 
 export const getTourDetail = async (tourID) => {
   try {
-    const response = await axios.get(`${API_URL}/tour-details/${tourID}`);
+    const response = await axios.get(`${API_URL}/tours/tour-details/${tourID}`);
     console.log("API Response:", response.data); // Debug dữ liệu từ BE
     return response.data;
   } catch (error) {
@@ -148,14 +139,39 @@ export const getAllTours = async (page = 0, size = 9) => {
 };
 
 export const createTour = async (tourData) => {
-  const res = await axios.post(`${API_URL}/admin/tours/create`, tourData);
-  return res.data;
+  try {
+    const res = await axios.post(`${API_URL}/admin/tours/create`, tourData);
+    return res.data;
+  } catch (error) {
+    // Xử lý mọi loại lỗi (mạng, server, validation)
+    return {
+      code: error.response?.status || 500,
+      message: 
+        error.response?.data?.message || // Lỗi từ server
+        error.message ||                 // Lỗi từ axios
+        "Không thể kết nối đến server",
+      result: null
+    };
+  }
 };
 
 export const updateTour = async (id, tourData) => {
-  const res = await axios.put(`${API_URL}/admin/tours/update/${id}`, tourData);
-  return res.data;
+  try {
+    const res = await axios.put(`${API_URL}/admin/tours/update/${id}`, tourData);
+    return res.data;
+  } catch (error) {
+    return {
+      code: error.response?.status || 500,
+      message: 
+        error.response?.data?.message || 
+        error.message || 
+        "Không thể cập nhật tour",
+      result: null
+    };
+  }
 };
+
+
 
 export const deleteTour = async (id) => {
   await axios.delete(`${API_URL}/admin/tours/${id}`);
@@ -204,4 +220,45 @@ export const updatePromotion = async (id, promotion) => {
 
 export const deletePromotion = async (id) => {
   await axios.delete(`${API_URL}/admin/promotions/${id}`);
+};
+
+
+export const getUserProfile = (userId) =>
+  axios.get(`${API_URL}/users/${userId}/profile`);
+
+export const updateUser = (userId, data) =>
+  axios.put(`${API_URL}/users/update/${userId}`, data);
+
+export const changePassword = (userId, data) =>
+  axios.put(`${API_URL}/users/change-password/${userId}`, data);
+
+export const changeAvatar = (userId, file) => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  return axios.put(`${API_URL}/users/change-avatar/${userId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
+
+export const getUserHistory = (userId, page = 0, size = 9, actionType) => {
+  let url = `${API_URL}/history/user/${userId}?page=${page}&size=${size}`;
+  if (actionType) {
+    url += `&actionType=${actionType}`;
+  }
+  return axios.get(url);
+};
+
+
+export const deleteUser = async (userId) => {
+  try {
+    await axios.delete(`${API_URL}/admin/users/delete/${userId}`);
+    // Optionally return something or just let it resolve
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message ||
+      error.message ||
+      "Error deleting user"
+    );
+  }
 };

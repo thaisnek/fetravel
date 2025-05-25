@@ -2,12 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 
 const emptyTimeline = { day: "", description: "" };
-const emptyImage = { imageURL: "", description: "" };
 
 export default function TourFormModal({ show, onHide, onSubmit, initialData, isEdit }) {
   const [step, setStep] = useState(1);
-
-  // Step 1: Thông tin cơ bản
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -21,10 +18,7 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
     startDate: "",
     endDate: "",
   });
-
-  // Step 2: Timeline & Image
   const [timelines, setTimelines] = useState([]);
-  const [images, setImages] = useState([]);
 
   useEffect(() => {
     if (initialData) {
@@ -42,7 +36,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
         endDate: initialData.endDate || "",
       });
       setTimelines(initialData.timelines || []);
-      setImages(initialData.images || []);
     } else {
       setForm({
         title: "",
@@ -58,7 +51,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
         endDate: "",
       });
       setTimelines([]);
-      setImages([]);
     }
     setStep(1);
   }, [initialData, show]);
@@ -71,7 +63,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
     }));
   };
 
-  // Timeline handlers
   const handleTimelineChange = (idx, field, value) => {
     const newTimelines = [...timelines];
     newTimelines[idx][field] = value;
@@ -79,15 +70,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
   };
   const addTimeline = () => setTimelines((prev) => [...prev, { ...emptyTimeline }]);
   const removeTimeline = (idx) => setTimelines((prev) => prev.filter((_, i) => i !== idx));
-
-  // Image handlers
-  const handleImageChange = (idx, field, value) => {
-    const newImages = [...images];
-    newImages[idx][field] = value;
-    setImages(newImages);
-  };
-  const addImage = () => setImages((prev) => [...prev, { ...emptyImage }]);
-  const removeImage = (idx) => setImages((prev) => prev.filter((_, i) => i !== idx));
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -99,9 +81,10 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
     setStep(1);
   };
 
+  // Gá»­i dá»¯ liá»‡u tour lÃªn backend, khÃ´ng gá»­i áº£nh
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ ...form, timelines, images });
+    onSubmit({ ...form, timelines });
   };
 
   return (
@@ -113,62 +96,160 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
         <Modal.Body>
           {step === 1 && (
             <>
-              <h5>Thông tin cơ bản</h5>
-              <Form.Group className="mb-2">
-                <Form.Label>Tên tour</Form.Label>
-                <Form.Control className="border border-primary" name="title" value={form.title} onChange={handleChange} required />
-              </Form.Group>
+              <h5>Thông tin cơ bản của Tour</h5>
+              <Row className="mb-2">
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Tên tour</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      name="title"
+                      value={form.title}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Thời gian</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      name="duration"
+                      value={form.duration}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
               <Form.Group className="mb-2">
                 <Form.Label>Mô tả</Form.Label>
-                <Form.Control className="border border-primary" name="description" value={form.description} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Thời gian</Form.Label>
-                <Form.Control className="border border-primary" name="duration" value={form.duration} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Số lượng</Form.Label>
-                <Form.Control className="border border-primary" name="quantity" type="number" value={form.quantity} onChange={handleChange} required min={1} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Giá người lớn</Form.Label>
-                <Form.Control className="border border-primary" name="priceAdult" type="number" value={form.priceAdult} onChange={handleChange} required min={0} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Giá trẻ em</Form.Label>
-                <Form.Control className="border border-primary" name="priceChild" type="number" value={form.priceChild} onChange={handleChange} required min={0} />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Điểm đến</Form.Label>
-                <Form.Control className="border border-primary" name="destination" value={form.destination} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Domain</Form.Label>
-                <Form.Control className="border border-primary" name="domain" value={form.domain} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Check
-                  type="checkbox"
-                  label="Còn chỗ"
-                  name="availability"
-                  checked={form.availability}
+                <Form.Control
+                  className="border border-primary"
+                  as="textarea"
+                  rows={2}
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
+                  required
                 />
               </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Ngày bắt đầu</Form.Label>
-                <Form.Control className="border border-primary" name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Label>Ngày kết thúc</Form.Label>
-                <Form.Control className="border border-primary" name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
-              </Form.Group>
+              <Row className="mb-2">
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Số lượng</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      type="number"
+                      name="quantity"
+                      value={form.quantity}
+                      min={1}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Giá người lớn</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      type="number"
+                      name="priceAdult"
+                      value={form.priceAdult}
+                      min={0}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Giá trẻ em</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      type="number"
+                      name="priceChild"
+                      value={form.priceChild}
+                      min={0}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="mb-2">
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Điểm đến</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      name="destination"
+                      value={form.destination}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Khu vực</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      name="domain"
+                      value={form.domain}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="mb-2">
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Trạng thái</Form.Label>
+                    <Form.Check
+                      type="checkbox"
+                      label="Còn chỗ"
+                      name="availability"
+                      checked={form.availability}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Ngày bắt đầu</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      type="date"
+                      name="startDate"
+                      value={form.startDate}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Ngày kết thúc</Form.Label>
+                    <Form.Control
+                      className="border border-primary"
+                      type="date"
+                      name="endDate"
+                      value={form.endDate}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
             </>
           )}
-
           {step === 2 && (
             <>
-              <h5>Lịch trình (Timeline)</h5>
+              <h5>Lịch trình</h5>
               {timelines.map((tl, idx) => (
                 <Row key={idx} className="mb-2">
                   <Col xs={3}>
@@ -198,33 +279,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
               ))}
               <Button variant="secondary" size="sm" onClick={addTimeline}>+ Thêm ngày</Button>
               <hr />
-              <h5>Hình ảnh</h5>
-              {images.map((img, idx) => (
-                <Row key={idx} className="mb-2">
-                  <Col xs={6}>
-                    <Form.Control
-                      className="border border-primary"
-                      placeholder="URL"
-                      value={img.imageURL}
-                      onChange={e => handleImageChange(idx, "imageURL", e.target.value)}
-                      required
-                    />
-                  </Col>
-                  <Col xs={4}>
-                    <Form.Control
-                      className="border border-primary"
-                      placeholder="Mô tả"
-                      value={img.description}
-                      onChange={e => handleImageChange(idx, "description", e.target.value)}
-                      required
-                    />
-                  </Col>
-                  <Col xs={2}>
-                    <Button variant="danger" size="sm" onClick={() => removeImage(idx)}>-</Button>
-                  </Col>
-                </Row>
-              ))}
-              <Button variant="secondary" size="sm" onClick={addImage}>+ Thêm ảnh</Button>
             </>
           )}
         </Modal.Body>

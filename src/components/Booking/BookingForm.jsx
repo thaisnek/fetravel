@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getTourDetail, createBooking, initiatePayment } from '../../services/api';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8080/ltweb/api'; // URL cơ sở của backend
 
 const BookingForm = ({ tourId, userId }) => {
   const [formData, setFormData] = useState({
@@ -13,14 +16,17 @@ const BookingForm = ({ tourId, userId }) => {
     totalPrice: 0,
     tourId,
     userId,
+    promotionCode: '', // Thay thế coupon bằng promotionCode
   });
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [coupon, setCoupon] = useState('');
   const [discount, setDiscount] = useState(0);
+  const [promotionError, setPromotionError] = useState(null);
+  const [promotionApplied, setPromotionApplied] = useState(false);
 
+  // Lấy thông tin tour từ backend
   const fetchTour = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -38,6 +44,7 @@ const BookingForm = ({ tourId, userId }) => {
     fetchTour();
   }, [fetchTour]);
 
+  // Tính tổng giá cơ bản (chưa áp dụng giảm giá)
   const calculateTotalPrice = useCallback(() => {
     if (!tour) return 0;
     const adultPrice = formData.numAdults * (tour.priceAdult || 0);
@@ -52,6 +59,7 @@ const BookingForm = ({ tourId, userId }) => {
     }));
   }, [calculateTotalPrice]);
 
+  // Xử lý thay đổi input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -60,6 +68,7 @@ const BookingForm = ({ tourId, userId }) => {
     }));
   };
 
+  // Xử lý thay đổi số lượng hành khách
   const handleQuantityChange = (type, operation) => {
     setFormData((prev) => {
       let newValue = prev[type];
@@ -79,16 +88,44 @@ const BookingForm = ({ tourId, userId }) => {
     });
   };
 
-  const applyCoupon = () => {
-    if (coupon === 'DISCOUNT10') {
-      setDiscount(100000);
-      setError(null);
-    } else {
+  // Xử lý áp dụng mã khuyến mãi
+  const applyPromotionCode = async () => {
+    if (!formData.promotionCode) {
+      setPromotionError('Vui lòng nhập mã khuyến mãi.');
+      setError('Vui lòng nhập mã khuyến mãi.');
+      return;
+    }
+    setLoading(true);
+    setPromotionError(null);
+    setError(null);
+    try {
+      const response = await axios.post(`${API_URL}/promotions/validate`, {
+        code: formData.promotionCode,
+      });
+      const result = response.data;
+      if (result.valid && result.discount > 0) {
+        const basePrice = formData.numAdults * (tour?.priceAdult || 0) + formData.numChildren * (tour?.priceChild || 0);
+        const discountAmount = Math.floor(basePrice * (result.discount / 100));
+        setDiscount(discountAmount);
+        setPromotionApplied(true);
+        setPromotionError(null);
+      } else {
+        setDiscount(0);
+        setPromotionApplied(false);
+        setPromotionError(result.message || 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
+        setError(result.message || 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
+      }
+    } catch (err) {
       setDiscount(0);
-      setError('Mã giảm giá không hợp lệ');
+      setPromotionApplied(false);
+      setPromotionError(err.response?.data?.message || 'Không thể kiểm tra mã khuyến mãi.');
+      setError(err.response?.data?.message || 'Không thể kiểm tra mã khuyến mãi.');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Xử lý gửi form đặt chỗ
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.payment !== 'paypal-payment') {
@@ -109,35 +146,43 @@ const BookingForm = ({ tourId, userId }) => {
         tourId: formData.tourId,
         numAdults: formData.numAdults,
         numChildren: formData.numChildren,
-        totalPrice: formData.totalPrice,
         fullName: formData.fullName,
         email: formData.email,
         phoneNumber: formData.tel,
         address: formData.address,
         paymentMethod: 'paypal',
+        promotionCode: formData.promotionCode || '', // Gửi promotionCode đến backend
       };
 
       const bookingResponse = await createBooking(bookingRequest);
-      const bookingId = bookingResponse.bookingID;
+      const bookingId = bookingResponse.bookingID || bookingResponse.id; // Lấy bookingID từ phản hồi
 
+      // Cập nhật tổng giá từ phản hồi backend (đã áp dụng giảm giá nếu có)
+      if (bookingResponse.totalPrice !== undefined) {
+        setFormData((prev) => ({
+          ...prev,
+          totalPrice: bookingResponse.totalPrice,
+        }));
+        // Tính toán giảm giá dựa trên giá cơ bản và giá cuối cùng từ backend
+        const basePrice = calculateTotalPrice() + discount; // Giá cơ bản trước khi cập nhật
+        const discountAmount = basePrice - bookingResponse.totalPrice;
+        if (discountAmount > 0) {
+          setDiscount(discountAmount);
+        } else {
+          setDiscount(0);
+        }
+      }
+
+      // Chuyển hướng đến trang thanh toán PayPal
       const approvalUrl = await initiatePayment(bookingId);
       window.location.href = approvalUrl;
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể xử lý đặt chỗ');
+      setError(err.response?.data?.message || 'Không thể xử lý đặt chỗ. Vui lòng thử lại.');
       setSubmitting(false);
     }
   };
 
   const isFormValid = formData.fullName && formData.email && formData.tel && formData.address && formData.payment;
-
-  if (loading && !tour) return <div>Đang tải chi tiết tour...</div>;
-  if (error) return (
-    <div>
-      <p style={{ color: 'red' }}>{error}</p>
-      <button onClick={fetchTour}>Thử lại</button>
-    </div>
-  );
-  if (!tour) return <div>Không tìm thấy dữ liệu tour.</div>;
 
   return (
     <div className="page-wrapper">
@@ -269,11 +314,11 @@ const BookingForm = ({ tourId, userId }) => {
           <div className="booking-summary">
             <div className="summary-section">
               <div>
-                <p>Mã tour: TOUR00{tour.tourID}</p>
-                <h5 className="widget-title">{tour.title}</h5>
-                <p>Ngày khởi hành: {new Date(tour.startDate).toLocaleDateString('vi-VN')}</p>
-                <p>Ngày kết thúc: {new Date(tour.endDate).toLocaleDateString('vi-VN')}</p>
-                <p className="quantityAvailable">Số chỗ còn nhận: {tour.quantity}</p>
+                <p>Mã tour: TOUR00{tour?.tourID}</p>
+                <h5 className="widget-title">{tour?.title}</h5>
+                <p>Ngày khởi hành: {tour?.startDate ? new Date(tour.startDate).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                <p>Ngày kết thúc: {tour?.endDate ? new Date(tour.endDate).toLocaleDateString('vi-VN') : 'N/A'}</p>
+                <p className="quantityAvailable">Số chỗ còn nhận: {tour?.quantity}</p>
               </div>
 
               <div className="order-summary">
@@ -283,7 +328,7 @@ const BookingForm = ({ tourId, userId }) => {
                     <span className="quantity__adults">{formData.numAdults}</span>
                     <span>X</span>
                     <span className="total-price">
-                      {(formData.numAdults * tour.priceAdult).toLocaleString('vi-VN', {
+                      {(formData.numAdults * (tour?.priceAdult || 0)).toLocaleString('vi-VN', {
                         style: 'currency',
                         currency: 'VND',
                       })}
@@ -296,7 +341,7 @@ const BookingForm = ({ tourId, userId }) => {
                     <span className="quantity__children">{formData.numChildren}</span>
                     <span>X</span>
                     <span className="total-price">
-                      {(formData.numChildren * tour.priceChild).toLocaleString('vi-VN', {
+                      {(formData.numChildren * (tour?.priceChild || 0)).toLocaleString('vi-VN', {
                         style: 'currency',
                         currency: 'VND',
                       })}
@@ -323,17 +368,18 @@ const BookingForm = ({ tourId, userId }) => {
                 <input
                   type="text"
                   placeholder="Mã giảm giá"
-                  value={coupon}
-                  onChange={(e) => setCoupon(e.target.value)}
+                  value={formData.promotionCode}
+                  onChange={(e) => setFormData(prev => ({ ...prev, promotionCode: e.target.value }))}
                   style={{ width: '65%' }}
                 />
                 <button
                   type="button"
                   style={{ width: '30%' }}
                   className="booking-btn btn-coupon"
-                  onClick={applyCoupon}
+                  onClick={applyPromotionCode}
+                  disabled={loading || promotionApplied}
                 >
-                  Áp dụng
+                  {loading ? 'Đang kiểm tra...' : 'Áp dụng'}
                 </button>
               </div>
 
