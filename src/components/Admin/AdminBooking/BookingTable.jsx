@@ -13,7 +13,6 @@ export default function BookingTable() {
 
   useEffect(() => {
     fetchBookings();
-    // eslint-disable-next-line
   }, [page]);
 
   const fetchBookings = async () => {

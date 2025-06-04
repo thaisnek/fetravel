@@ -3,9 +3,14 @@ import { Container, Button, Row, Col, Card, Spinner, Pagination } from "react-bo
 import { deleteUser } from '../../../services/api'; // <-- import here
 
 const BACKEND_URL = "http://localhost:8080";
+const token = localStorage.getItem("token");
 
 const fetchUsers = async (page, size) => {
-  const response = await fetch(`${BACKEND_URL}/ltweb/api/admin/users/all-users?page=${page}&size=${size}`);
+  const response = await fetch(`${BACKEND_URL}/ltweb/api/admin/users/all-users?page=${page}&size=${size}`,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      }
+  });
   if (!response.ok) throw new Error('Failed to fetch users');
   return response.json();
 };
@@ -33,7 +38,7 @@ const UserManagement = () => {
   }, [page]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    if (!window.confirm("bạn chắc chắn muốn xóa người dùng này chứ?")) return;
     setLoading(true);
     try {
       await deleteUser(id);
@@ -41,7 +46,7 @@ const UserManagement = () => {
       setUserList(data.content);
       setTotalPages(data.totalPages);
     } catch (err) {
-      alert(err.message || "Delete failed!");
+      alert(err.message || "Xóa thất bại!");
     }
     setLoading(false);
   };

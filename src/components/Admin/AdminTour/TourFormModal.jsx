@@ -81,7 +81,6 @@ export default function TourFormModal({ show, onHide, onSubmit, initialData, isE
     setStep(1);
   };
 
-  // Gá»­i dá»¯ liá»‡u tour lÃªn backend, khÃ´ng gá»­i áº£nh
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({ ...form, timelines });

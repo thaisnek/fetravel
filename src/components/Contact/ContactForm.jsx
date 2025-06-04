@@ -1,35 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
+import { jwtDecode } from 'jwt-decode';
 
 function ContactForm() {
   const [formData, setFormData] = useState({
-    name: '',
-    phone_number: '',
+    fullName: '',
+    phoneNumber: '',
     email: '',
     message: '',
   });
-  const [showNotification, setShowNotification] = useState(false);
+
+  // Lấy userId từ JWT token lưu ở localStorage
+  let userId = null;
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      userId = decoded.userId;
+    } catch {
+      userId = null;
+    }
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setShowNotification(true);
-    setFormData({ name: '', phone_number: '', email: '', message: '' });
-  };
-
-  // Tự động ẩn thông báo sau 3 giây
-  useEffect(() => {
-    if (showNotification) {
-      const timer = setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
-      return () => clearTimeout(timer);
+    if (!userId) {
+      alert('Bạn chưa đăng nhập!');
+      return;
     }
-  }, [showNotification]);
+    const body = { ...formData, userId };
+    try {
+      const res = await fetch('http://localhost:8080/ltweb/api/contacts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        alert("Gửi liên hệ thành công!");
+        setFormData({ fullName: '', phoneNumber: '', email: '', message: '' });
+      } else {
+        alert("Gửi thất bại!");
+      }
+    } catch {
+      alert("Có lỗi xảy ra!");
+    }
+  };
 
   return (
     <section className="contact-form-area py-70 rel z-1">
@@ -37,12 +60,6 @@ function ContactForm() {
         <div className="row align-items-center">
           <div className="col-lg-7">
             <div className="comment-form bgc-lighter z-1 rel mb-30 rmb-55">
-              {/* Thông báo tùy chỉnh */}
-              {showNotification && (
-                <div className="notification fixed top-4 right-4 bg-green-500 text-black px-4 py-2 rounded shadow-lg z-50">
-                  Gửi liên hệ thành công!
-                </div>
-              )}
               <form
                 id="contactForm"
                 className="contactForm"
@@ -59,14 +76,14 @@ function ContactForm() {
                 <div className="row mt-35">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label htmlFor="name">
+                      <label htmlFor="fullName">
                         Họ và tên <span style={{ color: 'red' }}>*</span>
                       </label>
                       <input
                         type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
                         onChange={handleChange}
                         className="form-control"
                         placeholder="Họ và tên"
@@ -76,14 +93,14 @@ function ContactForm() {
                   </div>
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label htmlFor="phone_number">
+                      <label htmlFor="phoneNumber">
                         Số điện thoại <span style={{ color: 'red' }}>*</span>
                       </label>
                       <input
                         type="text"
-                        id="phone_number"
-                        name="phone_number"
-                        value={formData.phone_number}
+                        id="phoneNumber"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
                         onChange={handleChange}
                         className="form-control"
                         placeholder="Số điện thoại"

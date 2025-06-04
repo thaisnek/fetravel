@@ -18,18 +18,16 @@ const TourRecommendations = ({ tourId }) => {
       }
       return BACKEND_URL + IMAGE_PATH + image.imageURL;
     }
-    return '/assets/images/default-tour.jpg'; // Ảnh mặc định nếu không có imageURL
+    return '/assets/images/default-tour.jpg'; 
   };
 
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/ltweb/api/tours/${tourId}/recommendations`);
-        console.log('API response:', response.data); // Debug: kiểm tra dữ liệu trả về
-        // Ánh xạ tourID thành tourId và lấy ảnh thứ hai
+        console.log('API response:', response.data); 
         const tours = (response.data || []).map(tour => {
-          console.log('Tour images:', tour.images); // Debug: kiểm tra images
-          // Lấy ảnh thứ hai (index 1)
+          console.log('Tour images:', tour.images); 
           const secondImage = tour.images && tour.images.length >= 2 ? tour.images[1] : (tour.images && tour.images.length > 0 ? tour.images[0] : null);
           const imageUrl = secondImage ? getImageUrl(secondImage) : '/assets/images/default-tour.jpg'; // Ảnh mặc định
           const tourData = {
@@ -39,13 +37,13 @@ const TourRecommendations = ({ tourId }) => {
             duration: tour.duration,
             imageUrl,
           };
-          console.log('Tour image URL:', tourData.imageUrl); // Debug: kiểm tra URL ảnh
+          console.log('Tour image URL:', tourData.imageUrl);
           return tourData;
         });
-        console.log('Mapped tours:', tours); // Debug: kiểm tra danh sách tours
+        console.log('Mapped tours:', tours); 
         setRecommendations(tours);
       } catch (err) {
-        console.error('Error fetching recommendations:', err); // Debug: lỗi chi tiết
+        console.error('Error fetching recommendations:', err); 
         setError('Không thể tải danh sách tour gợi ý');
       } finally {
         setLoading(false);

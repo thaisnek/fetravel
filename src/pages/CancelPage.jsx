@@ -1,34 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { cancelPayment } from '../services/api';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const CancelPage = () => {
   const [searchParams] = useSearchParams();
-  const [message, setMessage] = useState('Đang xử lý hủy...');
+  const [message, setMessage] = useState('Thanh toán đã được hủy');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const bookingId = searchParams.get('bookingId');
-
-    const handleCancel = async () => {
-      try {
-        const response = await cancelPayment(bookingId);
-        setMessage(response);
-      } catch (err) {
-        setMessage(err.response?.data?.message || 'Lỗi khi hủy thanh toán');
-      }
-    };
-
-    if (bookingId) {
-      handleCancel();
-    } else {
-      setMessage('Thiếu thông tin hủy');
+    
+    if (!bookingId) {
+      setMessage('Không tìm thấy thông tin booking');
     }
-  }, [searchParams]);
+
+    const timer = setTimeout(() => {
+      navigate("/history");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [searchParams, navigate]);
 
   return (
     <div style={{ padding: '50px', textAlign: 'center' }}>
       <h2>{message}</h2>
-      <a href="/">Quay lại trang chủ</a>
+      <p>Bạn sẽ được chuyển về trang lịch sử...</p>
     </div>
   );
 };

@@ -21,13 +21,11 @@ const HeroSection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra dữ liệu đầu vào
     if (!searchData.destination && !searchData.startDate && !searchData.endDate) {
       alert('Vui lòng nhập ít nhất một tiêu chí tìm kiếm (điểm đến, ngày khởi hành, hoặc ngày kết thúc).');
       return;
     }
 
-    // Kiểm tra định dạng ngày
     if (searchData.startDate && !/^\d{4}-\d{2}-\d{2}$/.test(searchData.startDate)) {
       alert('Ngày khởi hành không đúng định dạng (YYYY-MM-DD). Vui lòng kiểm tra lại.');
       return;
@@ -42,10 +40,7 @@ const HeroSection = () => {
     }
 
     try {
-      // Log tham số để debug
       console.log('Tham số gửi đi:', searchData);
-
-      // Gửi yêu cầu với tham số
       const response = await axios.get('http://localhost:8080/ltweb/api/tours/search', {
         params: {
           destination: searchData.destination || null,
@@ -105,18 +100,18 @@ const HeroSection = () => {
                 <option value="Đà Nẵng">Đà Nẵng</option>
                 <option value="Côn Đảo">Côn Đảo</option>
                 <option value="Hà Nội">Hà Nội</option>
-                <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                <option value="Hồ Chí Minh">Hồ Chí Minh</option>
                 <option value="Hạ Long">Hạ Long</option>
                 <option value="Ninh Bình">Ninh Bình</option>
                 <option value="Phú Quốc">Phú Quốc</option>
                 <option value="Đà Lạt">Đà Lạt</option>
                 <option value="Quảng Trị">Quảng Trị</option>
-                <option value="Nha Trang">Khánh Hòa (Nha Trang)</option>
+                <option value="Nha Trang">Nha Trang</option>
                 <option value="Cần Thơ">Cần Thơ</option>
                 <option value="Vũng Tàu">Vũng Tàu</option>
                 <option value="Quảng Ninh">Quảng Ninh</option>
-                <option value="Sa Pa">Lào Cai (Sa Pa)</option>
-                <option value="Bình Định">Bình Định (Quy Nhơn)</option>
+                <option value="Sa Pa">Sa Pa</option>
+                <option value="Bình Định">Bình Định</option>
               </select>
             </div>
             <div className="filter-item clearfix">

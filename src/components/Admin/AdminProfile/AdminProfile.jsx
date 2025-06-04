@@ -1,95 +1,67 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Card, ListGroup } from "react-bootstrap";
+import { getAdminById } from "../../../services/api";
 
-const adminInitial = {
-  username: "admin",
-  password: "",
-  email: "",
-  address: "",
-  avatarUrl: "https://hinhnen4k.com/wp-content/uploads/2023/02/anh-gai-xinh-vn-2.jpg", // Replace with your admin avatar path
-};
+const adminId = 1;
 
 const AdminProfile = () => {
-  const [admin, setAdmin] = useState(adminInitial);
+  const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (e) => {
-    setAdmin({ ...admin, [e.target.name]: e.target.value });
-  };
+  useEffect(() => {
+    if (!adminId) {
+      setLoading(false);
+      return;
+    }
+    getAdminById(adminId)
+      .then(data => {
+        setAdmin(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        alert("Không lấy được thông tin admin!");
+        setLoading(false);
+      });
+    // eslint-disable-next-line
+  }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Call API to update admin info here
-    alert("Admin info updated!");
-  };
+  if (loading) return <div className="text-center py-4">Đang tải dữ liệu...</div>;
+  if (!admin) return <div className="text-center text-danger">Không có dữ liệu admin!</div>;
 
   return (
     <Container fluid className="py-4">
-      <h3 className="mb-4">Thông tin admin</h3>
-      <Card className="p-4">
+      <h3 className="mb-4 text-center">Thông tin Admin</h3>
+      <Card className="shadow p-4 mx-auto" style={{ maxWidth: 1000 }}>
         <Row className="align-items-center">
-          <Col md={5} className="text-center">
+          <Col md={4} className="text-center mb-3 mb-md-0">
             <img
-              src={admin.avatarUrl}
+              src={"https://kynguyenlamdep.com/wp-content/uploads/2022/08/anh-cute-meo-con-nguy-hiem.jpg"}
               alt="Admin Avatar"
               style={{
-                width: 250,
-                height: 250,
-                borderRadius: "8px",
+                width: 180,
+                height: 180,
+                borderRadius: "12px",
                 objectFit: "cover",
-                border: "1px solid #ddd",
+                border: "3px solid #20bfa9",
+                boxShadow: "0 4px 16px rgba(32,191,169,0.08)"
               }}
             />
           </Col>
-          <Col md={7}>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3" controlId="adminUsername">
-                <Form.Label>Tên admin</Form.Label>
-                <Form.Control
-                  className="border border-primary"
-                  type="text"
-                  name="username"
-                  value={admin.username}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="adminPassword">
-                <Form.Label>Mật khẩu</Form.Label>
-                <Form.Control
-                  className="border border-primary"
-                  type="password"
-                  name="password"
-                  value={admin.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="adminEmail">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  className="border border-primary"
-                  type="email"
-                  name="email"
-                  value={admin.email}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="adminAddress">
-                <Form.Label>Địa chỉ</Form.Label>
-                <Form.Control
-                  className="border border-primary"
-                  type="text"
-                  name="address"
-                  value={admin.address}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Button type="submit" variant="teal" style={{ background: "#20bfa9", border: "none" }}>
-                Cập nhật
-              </Button>
-            </Form>
+          <Col md={8}>
+            <ListGroup variant="flush">
+              <ListGroup.Item>
+                <b>Họ và tên:</b> {admin.fullName || <span className="text-muted">Chưa cập nhật</span>}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <b>Email:</b> {admin.email || <span className="text-muted">Chưa cập nhật</span>}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <b>Địa chỉ:</b> {admin.address || <span className="text-muted">Chưa cập nhật</span>}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <b>Số điện thoại:</b> {admin.phone || <span className="text-muted">Chưa cập nhật</span>}
+              </ListGroup.Item>
+            </ListGroup>
           </Col>
         </Row>
       </Card>

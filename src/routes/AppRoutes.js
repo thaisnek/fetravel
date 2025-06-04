@@ -16,6 +16,11 @@ import MyTourPage from '../pages/MyTourPage';
 import UserProfilePage from '../pages/UserProfilePage';
 import AdminUser from '../pages/AdminUser';
 import AdminProfilePage from '../pages/AdminProfilePage';
+import RegisterPage from '../pages/RegisterPage';
+import LoginPage from '../pages/LoginPage';
+import AboutPage from '../pages/AboutPage';
+import AdminDashboardPage from '../pages/AdminDashboardPage';
+import AdminContact from '../pages/AdminContact';
 
 const AppRoutes = () => {
   return (
@@ -29,7 +34,7 @@ const AppRoutes = () => {
       <Route path="/payment/cancel" element={<CancelPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/my-tours" element={<MyTourPage />} />
+      <Route path="/history" element={<MyTourPage />} />
       <Route path="/my-profile" element={<UserProfilePage />} />
       <Route path="/admin/tour" element={<AdminTour />} />
       <Route path="/admin/booking" element={<AdminBooking />} />
@@ -37,6 +42,11 @@ const AppRoutes = () => {
       <Route path="/admin/promotion" element={<AdminPromotion />} />
       <Route path="/admin/user" element={<AdminUser />} />
       <Route path="/admin/admin-profile" element={<AdminProfilePage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      <Route path="/admin/contact" element={<AdminContact />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/about" element={<AboutPage />} />
     </Routes>
   );
 };

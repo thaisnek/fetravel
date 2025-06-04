@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAvailableTours } from '../../services/api'; // Import các hàm API
-import { FaStar, FaMapMarkerAlt, FaArrowRight, FaChevronLeft, FaChevronRight} from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt, FaArrowRight, FaChevronLeft, FaChevronRight, FaRegClock, FaRegUser} from 'react-icons/fa';
 import Slider from 'rc-slider'; // Import Slider để lọc giá
 import 'rc-slider/assets/index.css'; // Import CSS cho Slider
 
@@ -353,7 +353,7 @@ const AllTour = () => {
                       <div className="content equal-content-fix">
                         <div className="destination-header">
                           <span className="location">
-                            <FaMapMarkerAlt /> {mappedTours.location}
+                            <FaMapMarkerAlt style={{marginBottom: 5 }}/> {mappedTours.location}
                           </span>
                           <div className="ratting filled" style={{ marginTop: 5 }}>
                             {[...Array(5)].map((_, i) => (
@@ -370,10 +370,10 @@ const AllTour = () => {
                         </h6>
                         <ul className="blog-meta">
                           <li>
-                            <i className="far fa-clock"></i> {mappedTours.duration}
+                            <FaRegClock style={{marginBottom: 5 }} /> {mappedTours.duration}
                           </li>
                           <li>
-                            <i className="far fa-user"></i> {mappedTours.capacity}
+                            <FaRegUser style={{marginBottom: 5 }} /> {mappedTours.capacity}
                           </li>
                         </ul>
                         <div className="destination-footer">
@@ -384,7 +384,7 @@ const AllTour = () => {
                             href={`/tour-details/${mappedTours.id}`}
                             className="theme-btn style-two style-three"
                           >
-                            <FaArrowRight />
+                            <FaArrowRight/>
                           </a>
                         </div>
                       </div>

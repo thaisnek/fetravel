@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaSearch, FaUser, FaArrowRight } from 'react-icons/fa';
 
 const Navbar2 = () => {
@@ -7,6 +7,19 @@ const Navbar2 = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isFixed, setIsFixed] = useState(false);
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    navigate('/');
+    setIsDropdownOpen(false);
+  };
 
   const toggleSearch = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -37,6 +50,8 @@ const Navbar2 = () => {
     };
   }, []);
 
+  const location = useLocation();
+
   return (
     <header className={`main-header header-one white-menu ${isFixed ? 'fixed-header' : ''}`}>
       <div className="header-upper py-30 rpy-0" style={{ backgroundColor: '#fff' }}>
@@ -51,20 +66,17 @@ const Navbar2 = () => {
               <nav className="main-menu navbar-expand-lg">
                 <div className="navbar-collapse collapse clearfix">
                   <ul className="navigation clearfix">
-                    <li>
+                    <li className={location.pathname === "/" ? "active" : ""}>
                       <Link to="/">Trang chủ</Link>
                     </li>
-                    <li>
+                    <li className={location.pathname === "/about" ? "active" : ""}>
                       <Link to="/about">Giới thiệu</Link>
                     </li>
-                    <li className="active">
+                    <li className={location.pathname === "/all-tours" ? "active" : ""}>
                       <Link to="/all-tours">Tours</Link>
                     </li>
-                    <li>
-                      <Link to="/destinations">Điểm đến</Link>
-                    </li>
-                    <li>
-                      <Link to="/contact">Liên Hệ</Link>
+                    <li className={location.pathname === "/contact" ? "active" : ""}>
+                      <Link to="/contact">Liên hệ</Link>
                     </li>
                   </ul>
                 </div>
@@ -108,7 +120,7 @@ const Navbar2 = () => {
             </div>
 
             <div className="menu-btns py-10">
-              <Link to="/tour" className="theme-btn style-two bgc-secondary">
+              <Link to="/all-tours" className="theme-btn style-two bgc-secondary">
                 <span data-hover="Đặt Ngay">Book Now</span>
                 <FaArrowRight />
               </Link>
@@ -147,25 +159,31 @@ const Navbar2 = () => {
                         </Link>
                       </li>
                       <li style={{ padding: '8px 20px' }}>
-                        <Link to="/my-tours" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                        <Link to="/history" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
                           Tour đã đặt
                         </Link>
                       </li>
-                      <li style={{ padding: '8px 20px' }}>
-                        <Link to="/login" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
-                          Đăng nhập
-                        </Link>
-                      </li>
-                      <li style={{ padding: '8px 20px' }}>
-                        <Link to="/signup" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
-                          Đăng ký
-                        </Link>
-                      </li>
-                      <li style={{ padding: '8px 20px' }}>
-                        <Link to="/logout" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
-                          Đăng xuất
-                        </Link>
-                      </li>
+                      {!isLoggedIn && (
+                        <>
+                          <li style={{ padding: '8px 20px' }}>
+                            <Link to="/register" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                              Đăng ký
+                            </Link>
+                          </li>
+                          <li style={{ padding: '8px 20px' }}>
+                            <Link to="/login" style={{ textDecoration: 'none', color: 'black', display: 'block' }}>
+                              Đăng nhập
+                            </Link>
+                          </li>
+                        </>
+                      )}
+                      {isLoggedIn && (
+                        <li style={{ padding: '8px 20px', cursor: 'pointer' }} onClick={handleLogout}>
+                          <span style={{ color: 'black', display: 'block' }}>
+                            Đăng xuất
+                          </span>
+                        </li>
+                      )}
                     </ul>
                   )}
                 </li>

@@ -3,6 +3,7 @@ import { getTourDetail, createBooking, initiatePayment } from '../../services/ap
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8080/ltweb/api'; // URL cơ sở của backend
+const token = localStorage.getItem("token");
 
 const BookingForm = ({ tourId, userId }) => {
   const [formData, setFormData] = useState({
@@ -99,9 +100,11 @@ const BookingForm = ({ tourId, userId }) => {
     setPromotionError(null);
     setError(null);
     try {
-      const response = await axios.post(`${API_URL}/promotions/validate`, {
-        code: formData.promotionCode,
-      });
+      const response = await axios.post(
+        `${API_URL}/promotions/validate`,
+        { code: formData.promotionCode },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : {}
+      );
       const result = response.data;
       if (result.valid && result.discount > 0) {
         const basePrice = formData.numAdults * (tour?.priceAdult || 0) + formData.numChildren * (tour?.priceChild || 0);

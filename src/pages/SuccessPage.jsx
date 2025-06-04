@@ -1,36 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { completePayment } from '../services/api';
+import React, { useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const SuccessPage = () => {
   const [searchParams] = useSearchParams();
-  const [message, setMessage] = useState('Đang xử lý thanh toán...');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const paymentId = searchParams.get('paymentId');
     const payerId = searchParams.get('PayerID');
     const bookingId = searchParams.get('bookingId');
 
-    const handlePayment = async () => {
-      try {
-        const response = await completePayment(paymentId, payerId, bookingId);
-        setMessage(response);
-      } catch (err) {
-        setMessage(err.response?.data?.message || 'Lỗi khi hoàn tất thanh toán');
-      }
-    };
-
-    if (paymentId && payerId && bookingId) {
-      handlePayment();
-    } else {
-      setMessage('Thiếu thông tin thanh toán');
+    if (!paymentId || !payerId || !bookingId) {
+      navigate("/error", { state: "Thiếu thông tin thanh toán" });
+      return;
     }
-  }, [searchParams]);
+
+    const timer = setTimeout(() => {
+      navigate("/history", { 
+        state: { 
+          message: "Thanh toán thành công",
+          paymentId,
+          bookingId 
+        }
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [searchParams, navigate]);
 
   return (
     <div style={{ padding: '50px', textAlign: 'center' }}>
-      <h2>{message}</h2>
-      <a href="/">Quay lại trang chủ</a>
+      <h2>💰 Thanh toán thành công!</h2>
+      <p>Bạn sẽ được chuyển về trang lịch sử trong giây lát...</p>
     </div>
   );
 };

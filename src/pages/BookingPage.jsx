@@ -4,10 +4,22 @@ import Navbar2 from '../components/common/Navbar2';
 import Banner from '../components/Booking/Banner';
 import BookingForm from '../components/Booking/BookingForm';
 import Footer from '../components/common/Footer';
+import { jwtDecode } from "jwt-decode";
+
+const token = localStorage.getItem("token");
+let userId = null;
+if (token) {
+  try {
+    const decoded = jwtDecode(token);
+    userId = decoded.userId;
+  } catch {
+    userId = null;
+  }
+}
+
 
 const BookingPage = () => {
-  const { tourId } = useParams(); // Lấy tourId từ URL
-  const userId = 1;
+  const { tourId } = useParams(); 
   return (
     <div className="page-wrapper">
       <Navbar2 />

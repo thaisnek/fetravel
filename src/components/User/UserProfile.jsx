@@ -1,17 +1,31 @@
 import React, { useRef, useState, useEffect } from "react";
-
+import { useNavigate } from "react-router-dom";
 import {
   getUserProfile,
   updateUser,
   changePassword,
   changeAvatar,
 } from '../../services/api';
+import { jwtDecode } from "jwt-decode";
 
-const userId = 1;
 const BACKEND_URL = "http://localhost:8080";
 const IMAGE_PATH = "/ltweb/images/avatar/";
 
+
+
 const UserProfile = () => {
+  const token = localStorage.getItem("token");
+  let userId = null;
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      userId = decoded.userId;
+    } catch {
+      userId = null;
+    }
+  }
+
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [profileForm, setProfileForm] = useState({
@@ -30,6 +44,11 @@ const UserProfile = () => {
 
   // Lấy dữ liệu user thực tế từ backend khi component mount
   useEffect(() => {
+    if (!userId) {
+      alert("Bạn chưa đăng nhập!");
+      navigate("/login");
+      return;
+    }
     getUserProfile(userId)
       .then(res => {
         const userData = res.data;
@@ -43,7 +62,7 @@ const UserProfile = () => {
         });
       })
       .catch(() => alert("Không lấy được thông tin user!"));
-  }, []);
+  }, [userId, navigate]);
 
   // Xử lý chọn ảnh đại diện và preview + gửi lên BE
   const handleAvatarChange = (e) => {

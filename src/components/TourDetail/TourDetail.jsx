@@ -5,15 +5,28 @@ import TourTimelineAccordion from './TourTimelineAccordion';
 import TourReviews from './TourReviews';
 import ReviewForm from './ReviewForm';
 import TourRecommendations from './TourRecommendations';
+import { jwtDecode } from "jwt-decode";
+
 
 const TourDetail = ({ tour }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    // Giả lập currentUser với userID = 1 (vì chưa có đăng nhập)
-    const userData = { userID: 1, username: 'Nguyễn Văn A' };
-    setCurrentUser(userData);
-  }, []);
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      setCurrentUser({
+        userID: decoded.userId, 
+        username: decoded.sub   
+      });
+    } catch (e) {
+      setCurrentUser(null);
+    }
+  } else {
+    setCurrentUser(null);
+  }
+}, []);
 
   if (!tour) return null;
 

@@ -17,7 +17,6 @@ const TourList = () => {
         setLoading(false);
       }
     };
-
     fetchTours();
   }, []); 
 

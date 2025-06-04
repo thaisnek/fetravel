@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Button, Table, Spinner, Modal } from "react-bootstrap";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus,FaEye } from "react-icons/fa";
 import { getAllTours, createTour, updateTour, deleteTour } from "../../../services/api";
 import TourFormModal from "./TourFormModal";
 import TourImageUploader from "./TourImageUploader";
+import TourDetailModal from "./TourDetailModal";
 
 export default function TourTable() {
   const [tours, setTours] = useState([]);
@@ -13,6 +14,8 @@ export default function TourTable() {
 
   const [showModal, setShowModal] = useState(false);
   const [editTour, setEditTour] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailTour, setDetailTour] = useState(null);
 
   // State cho upload ảnh
   const [createdTourId, setCreatedTourId] = useState(null);
@@ -33,6 +36,16 @@ export default function TourTable() {
       alert("Lỗi khi tải danh sách tour!");
     }
     setLoading(false);
+  };
+
+  const handleShowDetail = (tour) => {
+  setDetailTour(tour);
+  setShowDetailModal(true);
+  };
+
+  const handleCloseDetail = () => {
+  setShowDetailModal(false);
+  setDetailTour(null);
   };
 
   const handleDelete = async (id) => {
@@ -123,12 +136,13 @@ export default function TourTable() {
               <th>Ngày kết thúc</th>
               <th>Sửa</th>
               <th>Xóa</th>
+              <th>Chi tiết</th>
             </tr>
           </thead>
           <tbody>
             {tours.length === 0 ? (
               <tr>
-                <td colSpan={13} className="text-center">Không có dữ liệu</td>
+                <td colSpan={14} className="text-center">Không có dữ liệu</td>
               </tr>
             ) : (
               tours.map((tour) => (
@@ -149,6 +163,9 @@ export default function TourTable() {
                   </td>
                   <td>
                     <Button variant="outline-danger" size="sm" onClick={() => handleDelete(tour.tourID)}><FaTrash /></Button>
+                  </td>
+                  <td>
+                    <Button variant="info" size="sm" onClick={() => handleShowDetail(tour)}><FaEye/></Button>
                   </td>
                 </tr>
               ))
@@ -171,7 +188,6 @@ export default function TourTable() {
         isEdit={!!editTour}
       />
 
-      {/* Modal upload ảnh */}
       <Modal show={showImageUpload} onHide={handleImageUploadClose} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Upload Ảnh cho Tour</Modal.Title>
@@ -188,6 +204,12 @@ export default function TourTable() {
           )}
         </Modal.Body>
       </Modal>
+
+      <TourDetailModal
+        show={showDetailModal}
+        onHide={handleCloseDetail}
+        tour={detailTour}
+      />
     </div>
   );
 }

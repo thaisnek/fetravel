@@ -1,21 +1,9 @@
 import React from 'react';
-import { FaHeart, FaStar, FaRegStar, FaClock, FaUser, FaArrowRight, FaMapMarkerAlt } from 'react-icons/fa';
+import {FaStar, FaRegStar, FaClock, FaUser, FaArrowRight, FaMapMarkerAlt } from 'react-icons/fa';
 
 const BACKEND_URL = "http://localhost:8080";
 const IMAGE_PATH = "/ltweb/images/tour/";
 
-const getImageUrl = (tour) => {
-  if (tour.images && tour.images.length > 0 && tour.images[0].imageURL) {
-    // Nếu imageURL là URL đầy đủ
-    if (tour.images[0].imageURL.startsWith('http')) {
-      return tour.images[0].imageURL;
-    }
-    // Nếu chỉ là tên file, build lại URL
-    return BACKEND_URL + IMAGE_PATH + tour.images[0].imageURL;
-  }
-  // Ảnh mặc định nếu không có ảnh
-  return '/assets/images/gallery-tours/tfd_240115101543_813851_CON_DAO_1732899101.jpg';
-};
 
 const SearchList = ({ tours }) => {
   return (
@@ -36,11 +24,8 @@ const SearchList = ({ tours }) => {
                   data-aos-offset="50"
                 >
                   <div className="image" style={{ position: 'relative' }}>
-                    <a href="#" className="heart" style={{ position: 'absolute', top: 10, right: 10 }}>
-                      <FaHeart />
-                    </a>
                     <img
-                      src={getImageUrl(tour)}
+                      src={BACKEND_URL + IMAGE_PATH + tour.images[0].imageURL}
                       alt={tour.images && tour.images.length > 0 ? tour.images[0].description || 'Tour' : 'Tour'}
                     />
                   </div>
@@ -52,7 +37,7 @@ const SearchList = ({ tours }) => {
                       </span>
                       <div className="ratting">
                         {[...Array(5)].map((_, i) => (
-                          i < (tour.rating || 4) ? (
+                          i < (tour.averageRating) ? (
                             <FaStar key={i} />
                           ) : (
                             <FaRegStar key={i} />
@@ -61,7 +46,7 @@ const SearchList = ({ tours }) => {
                       </div>
                     </div>
                     <h5>
-                      <a href={`/tour-detail/${tour.tourID}`}>{tour.title}</a>
+                      <a href={`/tour-details/${tour.tourID}`}>{tour.title}</a>
                     </h5>
                     <ul className="blog-meta">
                       <li>
@@ -78,7 +63,7 @@ const SearchList = ({ tours }) => {
                         <span>{tour.priceAdult.toLocaleString('vi-VN')}</span> VND / người
                       </span>
                       <a
-                        href={`/tour-detail/${tour.tourID}`}
+                        href={`/tour-details/${tour.tourID}`}
                         className="theme-btn style-two style-three"
                         style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}
                       >

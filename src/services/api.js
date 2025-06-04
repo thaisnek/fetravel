@@ -5,7 +5,7 @@ const API_URL = 'http://localhost:8080/ltweb/api';
 
 export const getTours = async () => {
   try {
-    const response = await axios.get(`${API_URL}/tours`);
+    const response = await axios.get(`${API_URL}/home/tours`);
     return response.data;
   } catch (error) {
     console.error('Error fetching tours:', error);
@@ -40,8 +40,17 @@ export const getTourDetail = async (tourID) => {
 };
 
 export const createBooking = async (bookingData) => {
+  const token = localStorage.getItem("token");
   try {
-    const response = await axios.post(`${API_URL}/bookings/create`, bookingData);
+    const response = await axios.post(
+      `${API_URL}/bookings/create`,
+      bookingData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Error creating booking:', {
@@ -55,8 +64,17 @@ export const createBooking = async (bookingData) => {
 };
 
 export const initiatePayment = async (bookingId) => {
+  const token = localStorage.getItem("token");
   try {
-    const response = await axios.post(`${API_URL}/payment/create?bookingId=${bookingId}`);
+    const response = await axios.post(
+      `${API_URL}/payment/create?bookingId=${bookingId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Error initiating payment:', {
@@ -69,43 +87,15 @@ export const initiatePayment = async (bookingId) => {
   }
 };
 
-export const completePayment = async (paymentId, payerId, bookingId) => {
-  try {
-    const response = await axios.get(
-      `${API_URL}/payment/success?paymentId=${paymentId}&PayerID=${payerId}&bookingId=${bookingId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error('Error completing payment:', {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      url: `${API_URL}/payment/success`,
-    });
-    throw error;
-  }
-};
-
-export const cancelPayment = async (bookingId) => {
-  try {
-    const response = await axios.get(`${API_URL}/payment/cancel?bookingId=${bookingId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error canceling payment:', {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      url: `${API_URL}/payment/cancel?bookingId=${bookingId}`,
-    });
-    throw error;
-  }
-};
-
 // Kiểm tra xem người dùng có thể đánh giá không
 export const canReview = async (userId, tourId) => {
+  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(`${API_URL}/reviews/can-review`, {
-      params: { userId, tourId }
+      params: { userId, tourId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.data;
   } catch (error) {
@@ -115,8 +105,13 @@ export const canReview = async (userId, tourId) => {
 
 // Tạo đánh giá mới
 export const createReview = async (reviewData) => {
+  const token = localStorage.getItem("token");
   try {
-    const response = await axios.post(`${API_URL}/reviews`, reviewData);
+    const response = await axios.post(`${API_URL}/reviews`, reviewData,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || 'Lỗi khi gửi đánh giá');
@@ -134,13 +129,24 @@ export const getReviewsByTourId = async (tourId) => {
 };
 
 export const getAllTours = async (page = 0, size = 9) => {
-  const res = await axios.get(`${API_URL}/admin/tours`, { params: { page, size } });
+  const token = localStorage.getItem("token");
+  const res = await axios.get(`${API_URL}/admin/tours`, { 
+    params: { page, size },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+   });
   return res.data;
 };
 
 export const createTour = async (tourData) => {
+  const token = localStorage.getItem("token");
   try {
-    const res = await axios.post(`${API_URL}/admin/tours/create`, tourData);
+    const res = await axios.post(`${API_URL}/admin/tours/create`, tourData,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     // Xử lý mọi loại lỗi (mạng, server, validation)
@@ -156,8 +162,13 @@ export const createTour = async (tourData) => {
 };
 
 export const updateTour = async (id, tourData) => {
+  const token = localStorage.getItem("token");
   try {
-    const res = await axios.put(`${API_URL}/admin/tours/update/${id}`, tourData);
+    const res = await axios.put(`${API_URL}/admin/tours/update/${id}`, tourData,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (error) {
     return {
@@ -174,85 +185,154 @@ export const updateTour = async (id, tourData) => {
 
 
 export const deleteTour = async (id) => {
-  await axios.delete(`${API_URL}/admin/tours/${id}`);
+  const token = localStorage.getItem("token");
+  await axios.delete(`${API_URL}/admin/tours/${id}`,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
 };
 
 export const getAllBookings = async (page = 0, size = 9) => {
-  const res = await axios.get(`${API_URL}/admin/bookings`, { params: { page, size } });
+  const token = localStorage.getItem("token");
+  const res = await axios.get(`${API_URL}/admin/bookings`, { 
+    params: { page, size },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
   return res.data;
 };
 
 export const deleteBooking = async (id) => {
-  await axios.delete(`${API_URL}/admin/bookings/${id}`);
+  const token = localStorage.getItem("token");
+  await axios.delete(`${API_URL}/admin/bookings/${id}`,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  }
+  );
 };
 
 export const updateBookingStatus = async (id, status) => {
+  const token = localStorage.getItem("token");
   const res = await axios.put(`${API_URL}/admin/bookings/${id}/status`, null, {
-    params: { status }
+    params: { status },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
   });
   return res.data;
 };
 
 export const getAllReviews = async (page = 0, size = 10) => {
-  const res = await axios.get(`${API_URL}/admin/reviews`, { params: { page, size } });
+  const token = localStorage.getItem("token");
+  const res = await axios.get(`${API_URL}/admin/reviews`, { 
+    params: { page, size },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+   });
   return res.data;
 };
 
 export const deleteReview = async (id) => {
-  await axios.delete(`${API_URL}/admin/reviews/${id}`);
-};
-
-
-export const getAllPromotions = async (page = 0, size = 9) => {
-  const res = await axios.get(`${API_URL}/admin/promotions`, { params: { page, size } });
-  return res.data;
-};
-
-export const createPromotion = async (promotion) => {
-  const res = await axios.post(`${API_URL}/admin/promotions/create`, promotion);
-  return res.data;
-};
-
-export const updatePromotion = async (id, promotion) => {
-  const res = await axios.put(`${API_URL}/admin/promotions/update/${id}`, promotion);
-  return res.data;
-};
-
-export const deletePromotion = async (id) => {
-  await axios.delete(`${API_URL}/admin/promotions/${id}`);
-};
-
-
-export const getUserProfile = (userId) =>
-  axios.get(`${API_URL}/users/${userId}/profile`);
-
-export const updateUser = (userId, data) =>
-  axios.put(`${API_URL}/users/update/${userId}`, data);
-
-export const changePassword = (userId, data) =>
-  axios.put(`${API_URL}/users/change-password/${userId}`, data);
-
-export const changeAvatar = (userId, file) => {
-  const formData = new FormData();
-  formData.append('avatar', file);
-  return axios.put(`${API_URL}/users/change-avatar/${userId}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+  const token = localStorage.getItem("token");
+  await axios.delete(`${API_URL}/admin/reviews/${id}`,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
   });
 };
 
 
-export const getUserHistory = (userId, page = 0, size = 9, actionType) => {
-  let url = `${API_URL}/history/user/${userId}?page=${page}&size=${size}`;
-  if (actionType) {
-    url += `&actionType=${actionType}`;
-  }
-  return axios.get(url);
+export const getAllPromotions = async (page = 0, size = 9) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.get(`${API_URL}/admin/promotions`, { 
+    params: { page, size },
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
+  return res.data;
+};
+
+export const createPromotion = async (promotion) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.post(`${API_URL}/admin/promotions/create`, promotion,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
+  return res.data;
+};
+
+export const updatePromotion = async (id, promotion) => {
+  const token = localStorage.getItem("token");
+  const res = await axios.put(`${API_URL}/admin/promotions/update/${id}`, promotion,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
+  return res.data;
+};
+
+export const deletePromotion = async (id) => {
+  const token = localStorage.getItem("token");
+  await axios.delete(`${API_URL}/admin/promotions/${id}`,{
+    headers: {
+        Authorization: `Bearer ${token}`,
+      },
+  });
+};
+
+
+export const getUserProfile = (userId) =>{
+  const token = localStorage.getItem("token");
+  return axios.get(`${API_URL}/users/${userId}/profile`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+  
+
+export const updateUser = (userId, data) =>{
+  const token = localStorage.getItem("token");
+  return axios.put(`${API_URL}/users/update/${userId}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+  
+
+export const changePassword = (userId, data) =>{
+  const token = localStorage.getItem("token");
+  return axios.put(`${API_URL}/users/change-password/${userId}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+  
+
+export const changeAvatar = (userId, file) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+  const token = localStorage.getItem("token");
+  return axios.put(`${API_URL}/users/change-avatar/${userId}`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 
 export const deleteUser = async (userId) => {
+  const token = localStorage.getItem("token");
   try {
-    await axios.delete(`${API_URL}/admin/users/delete/${userId}`);
+    await axios.delete(`${API_URL}/admin/users/delete/${userId}`,{
+      headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+    });
     // Optionally return something or just let it resolve
   } catch (error) {
     throw new Error(
@@ -261,4 +341,70 @@ export const deleteUser = async (userId) => {
       "Error deleting user"
     );
   }
+};
+
+
+// Register
+export const registerUser = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
+    const text = await response.text();
+    return { ok: response.ok, message: text };
+  } catch (error) {
+    return { ok: false, message: "Network error!" };
+  }
+};
+
+// Login
+export const login = async (loginData) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginData),
+    });
+    if (!response.ok) {
+      return {};
+    }
+    return await response.json();
+  } catch (error) {
+    return {};
+  }
+};
+
+export const getAdminById = async (adminId) => {
+  const token = localStorage.getItem("token"); // Nếu backend yêu cầu xác thực
+  const res = await axios.get(`${API_URL}/admin/${adminId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.data;
+};
+
+
+
+export const getDashboardStats = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${API_URL}/admin/dashboard/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(res => res.data);
+};
+
+export const getTopTours = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${API_URL}/admin/dashboard/top-tours`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(res => res.data);
+};
+
+export const getTopCustomers = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${API_URL}/admin/dashboard/top-customers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(res => res.data);
 };

@@ -6,14 +6,12 @@ function TourImageUploader({ tourId, onUploaded }) {
   const [loading, setLoading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(Date.now());
 
-  // Xử lý chọn file và tạo preview
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setImages(files);
     setPreviews(files.map(file => URL.createObjectURL(file)));
   };
 
-  // Xóa preview khi unmount
   React.useEffect(() => {
     return () => {
       previews.forEach(url => URL.revokeObjectURL(url));
@@ -30,10 +28,15 @@ function TourImageUploader({ tourId, onUploaded }) {
     const formData = new FormData();
     images.forEach(img => formData.append("images", img));
 
+    const token = localStorage.getItem("token");
+
     try {
       const res = await fetch(`http://localhost:8080/ltweb/api/admin/tours/${tourId}/upload-images`, {
         method: "POST",
         body: formData,
+        headers: {
+        Authorization: `Bearer ${token}`,
+      }
       });
       const text = await res.text();
       let data;
@@ -49,7 +52,7 @@ function TourImageUploader({ tourId, onUploaded }) {
         onUploaded && onUploaded(data.result);
         setImages([]);
         setPreviews([]);
-        setFileInputKey(Date.now()); // Reset input để chọn tiếp ảnh
+        setFileInputKey(Date.now());
       } else {
         alert(data.message || "Upload thất bại!");
       }
@@ -62,7 +65,7 @@ function TourImageUploader({ tourId, onUploaded }) {
   return (
     <div>
       <input
-        key={fileInputKey} // Reset input khi key thay đổi
+        key={fileInputKey} 
         type="file"
         accept="image/*"
         multiple

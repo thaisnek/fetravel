@@ -1,22 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaStar, FaHeart, FaMapMarkerAlt, FaChevronRight } from 'react-icons/fa';
+import { FaStar, FaMapMarkerAlt, FaChevronRight } from 'react-icons/fa';
 
 
 const BACKEND_URL = "http://localhost:8080";
 const IMAGE_PATH = "/ltweb/images/tour/";
 
 const TourCard = ({ tour }) => {
-  const getImageUrl = () => {
-    if (tour.images && tour.images.length > 0 && tour.images[0].imageURL) {
-      if (tour.images[0].imageURL.startsWith('http')) {
-        return tour.images[0].imageURL;
-      }
-      return BACKEND_URL + IMAGE_PATH + tour.images[0].imageURL;
-    }
-    return '/assets/images/gallery-tours/bien-dao-3n2d-con-dao-1.jpg';
-  };
-
   return (
     <div className="col-xxl-3 col-xl-4 col-md-6" style={{ marginBottom: '30px' }}>
       <div className="destination-item block_tours">
@@ -25,7 +15,7 @@ const TourCard = ({ tour }) => {
             <FaStar /> {tour.averageRating || 0}
           </div>
           <img
-            src={getImageUrl()}
+            src={BACKEND_URL + IMAGE_PATH + tour.images[0].imageURL}
             alt="Destination"
           />
         </div>

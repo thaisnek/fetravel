@@ -4,15 +4,29 @@ import {
   FaStar,
   FaRegStar,
   FaArrowRight,
-  FaClock,
-  FaUser
+  FaClock
 } from "react-icons/fa";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = "http://localhost:8080";
 const IMAGE_PATH = "/ltweb/images/tour/";
 
+const getUserIdFromToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.userId || null; // Đảm bảo backend đã thêm userId vào token
+  } catch {
+    return null;
+  }
+};
+
 const MyTour = () => {
+  const navigate = useNavigate();
+  const userId = getUserIdFromToken();
   const [histories, setHistories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,9 +34,18 @@ const MyTour = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!userId) {
+      alert("Bạn chưa đăng nhập!");
+      navigate("/login");
+      return;
+    }
     setLoading(true);
     axios
-      .get(`http://localhost:8080/ltweb/api/history/user/1?page=${currentPage - 1}&size=9`)
+      .get(`http://localhost:8080/ltweb/api/history/user/${userId}?page=${currentPage - 1}&size=9`, {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        }
+      })
       .then((response) => {
         setHistories(response.data.content);
         setTotalPages(response.data.totalPages);
@@ -32,7 +55,19 @@ const MyTour = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, [currentPage]);
+  }, [currentPage, userId, navigate]);
+
+  // Hàm kiểm tra điều kiện hiển thị
+  const shouldShowHistory = (history) => {
+    if (history.actionType === "REVIEW") return true;
+    if (history.actionType === "BOOK" && history.bookingResponse.bookingStatus === "PENDING") return true;
+    if (history.actionType === "PAY" && history.bookingResponse.bookingStatus === "CONFIRMED") return true;
+    if (history.actionType === "CANCEL" && history.bookingResponse.bookingStatus === "CANCELLED") return true;
+    return false;
+  };
+
+  // Lọc danh sách theo điều kiện
+  const filteredHistories = histories.filter(shouldShowHistory);
 
   const renderBookingBadge = (actionType) => {
     switch (actionType) {
@@ -108,10 +143,10 @@ const MyTour = () => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-lg-9">
-            {histories.length === 0 ? (
+            {filteredHistories.length === 0 ? (
               <div className="text-center">Không có lịch sử tour nào</div>
             ) : (
-              histories.map((history) => (
+              filteredHistories.map((history) => (
                 <div className="destination-item style-three bgc-lighter" key={history.historyID}>
                   <div className="image">
                     {renderBookingBadge(history.actionType)}
@@ -125,9 +160,6 @@ const MyTour = () => {
                       <span className="location">
                         <FaMapMarkerAlt /> {history.tourResponse.destination}
                       </span>
-                      <div className="ratting">
-                        {renderStars(history.tourResponse.rating)}
-                      </div>
                     </div>
                     <h5>
                       <a href={`/tour-details/${history.tourResponse.tourID}`}>
